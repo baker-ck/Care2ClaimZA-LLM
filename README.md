@@ -1,19 +1,19 @@
 <p align="center">
-  <img src="cliniclaimza_logo_final.png" alt="CliniClaimZA-LLM Logo" width="220" />
+  <img src="Care2ClaimZA-LLM_logo_final.png" alt="Care2ClaimZA-LLM Logo" width="220" />
 </p>
 
-<h1 align="center">CliniClaimZA-LLM</h1>
+<h1 align="center">Care2ClaimZA-LLM</h1>
 <p align="center"><b>Fine-Tuned Gemma 3 1B for South African Healthcare Claims Adjudication & Triage</b></p>
 
 ---
 
 ## 📌 Project Overview
 
-**CliniClaimZA-LLM** is a domain-adapted, parameter-efficient fine-tuned large language model based on **Google's Gemma 3 1B**. It is engineered to assist with healthcare administrative workflows within the South African medical scheme regulatory context—balancing structured scheme policy adjudication with empathetic conversational patient intake and triage.
+**Care2ClaimZA-LLM** is a domain-adapted, parameter-efficient fine-tuned large language model based on **Google's Gemma 3 1B**. It is engineered to assist with healthcare administrative workflows within the South African medical scheme regulatory context—balancing structured scheme policy adjudication with empathetic conversational patient intake and triage.
 
 Navigating South African private health insurance (medical aid) involves strict statutory regulations established by the **Council for Medical Schemes (CMS)**, including **Prescribed Minimum Benefits (PMBs)**, **Chronic Disease Lists (CDLs)**, and **Designated Service Provider (DSP)** network rules.
 
-**CliniClaimZA-LLM** addresses a dual operational workload:
+**Care2ClaimZA-LLM** addresses a dual operational workload:
 1. **Task 1: Scheme Policy Adjudication (Closed-Set Classification)**  
    Classifies incoming medical claims based on specialty and clinical descriptions into three policy decision categories:
    - `In-Cover` (Routine covered benefit / statutory PMB)
