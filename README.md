@@ -9,12 +9,9 @@
 
 ---
 
-
 # CliniClaimZA-LLM: Fine-Tuned Gemma 3 1B for South African Healthcare Claims Adjudication & Triage
 
 **CliniClaimZA-LLM** is a domain-adapted, parameter-efficient fine-tuned large language model based on **Google's Gemma 3 1B**. It is engineered to assist with healthcare administrative workflows within the South African medical scheme regulatory context—balancing structured scheme policy adjudication with empathetic conversational patient intake and triage.
-
----
 
 ## 📌 Project Overview
 
