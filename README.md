@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="cliniclaimza_logo_v7.png" alt="CliniClaimZA-LLM Logo" width="380"/>
+  <img src="cliniclaimza_logo_final.png" alt="CliniClaimZA-LLM Logo" width="380"/>
 </p>
 
 <h1 align="center">CliniClaimZA-LLM</h1>
