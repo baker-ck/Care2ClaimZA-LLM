@@ -41,6 +41,13 @@ Care2ClaimZA-LLM/
 │       ├── classification_training_data.jsonl       # Task 2 Training Split (235 claims, 80%)
 │       ├── classification_validation_data.jsonl     # Task 2 Validation Split (29 claims, 10%)
 │       └── classification_test_data.jsonl           # Task 2 Test Split (30 claims, 10%)
+├── predictions/
+│   ├── predictions_conversation_train_data.jsonl
+│   ├── predictions_conversation_val_data.jsonl
+│   ├── predictions_conversation_test_data.jsonl
+│   ├── predictions_classification_train_data.jsonl
+│   ├── predictions_classification_val_data.jsonl
+│   └── predictions_classification_test_data.jsonl        
 ```
 
 ---
