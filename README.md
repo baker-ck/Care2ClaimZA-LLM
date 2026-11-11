@@ -139,7 +139,7 @@ Evaluating the instruction-tuned classifier across policy adjudication decisions
 
 ---
 
-### 🔄 Step 9: End-to-End Hybrid Pipeline
+### 🔄 Care2ClaimLLM-ZA: End-to-End Hybrid Pipeline
 
 The hybrid pipeline connects both fine-tuned models sequentially in a single execution step:
 
