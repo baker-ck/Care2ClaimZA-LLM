@@ -3,214 +3,126 @@
 </p>
 
 <h1 align="center">Care2ClaimZA-LLM</h1>
-<p align="center"><b>Fine-Tuned Gemma 3 1B for South African Healthcare Claims Adjudication & Triage</b></p>
+<p align="center"><b>Fine-Tuned Gemma 3 1B for South African Healthcare Claims Adjudication & Conversational Triage</b></p>
 
 ---
 
-#### 📌 Executive Overview
-Navigating private health insurance and medical schemes in South Africa presents significant administrative complexity. **Care2ClaimLLM-ZA** is an open-source, dual-pathway AI initiative designed to translate everyday patient descriptions into administrative guidance and categorize medical claims against scheme policy rules.
+### 📌 Executive Overview
+Navigating private health insurance and medical schemes in South Africa presents significant administrative complexity. **Care2ClaimLLM-ZA** is an open-source, dual-pathway AI initiative built on **Google's Gemma 3 1B** foundation model using **Parameter-Efficient Fine-Tuning (LoRA)** on a **JAX backend**.
 
-Built on **Google's Gemma 3 1B** foundation model using **Parameter-Efficient Fine-Tuning (LoRA)** on a **JAX backend**, the system operates across two core operational pathways:
-1. **Task 1 (Multi-Turn Conversational Triage)**: A 3-turn interactive dialogue agent tailored with South African medical terminology, local slang, and demographic context to conduct patient intake and non-diagnostic administrative triage.
-2. **Task 2 (Single-Task Claim Policy Classification)**: An automated instruction-tuned classifier that categorizes clinical claim descriptions into three policy decision categories: `In-Cover`, `Out-of-Cover`, and `Requires Pre-Auth`.
+The platform operates across two core operational pathways, culminating in an integrated end-to-end hybrid adjudication pipeline:
+1. **Task 1 (Multi-Turn Conversational Triage)**: A 3-turn interactive dialogue agent tailored with South African medical terminology, local dialects (*Sawubona*, *Molo dokotela*, *Aweh doc*), and demographic context to conduct patient intake and non-diagnostic administrative triage.
+2. **Task 2 (Single-Task Claim Policy Classification)**: An instruction-tuned classifier that categorizes medical claims into three policy decision categories: `In-Cover`, `Out-of-Cover`, and `Requires Pre-Auth`.
+3. **Step 9 Hybrid Pipeline**: Integrates raw multi-turn intake dialogue directly into automated claim payload extraction and real-time policy adjudication.
 
 ---
 
-#### 📂 Recommended GitHub Repository Structure
-To ensure full reproducibility and clean modularization, the repository is organized into distinct data, script, notebook, and prediction directories:
+### 💻 Hardware, Runtime & Execution Environment
+
+All data processing, LoRA fine-tuning, and evaluation runs were executed on **Google Colab** under the following hardware specifications and execution flags:
+
+| Hardware / Environment Component | Specification / Setting | Operational Notes |
+| :--- | :--- | :--- |
+| **Platform Runtime** | **Google Colab** | Python 3.10+ / Linux OS |
+| **Accelerator GPU** | **NVIDIA T4 GPU** | 15.0 GB VRAM Ceiling |
+| **System RAM** | **12.7 GB System RAM** | Memory-mapped JSONL streaming |
+| **Deep Learning Backend** | **JAX + Keras 3** | `KERAS_BACKEND = "jax"` |
+| **VRAM Memory Flags** | `XLA_PYTHON_CLIENT_PREALLOCATE="false"`<br>`XLA_PYTHON_CLIENT_MEM_FRACTION="0.80"` | Prevents OOM during JIT compilation & batched generation |
+| **Precision Policy** | `mixed_bfloat16` | Optimized tensor execution on T4 GPU |
+| **Sequence Length Ceiling** | **512 tokens** | Accommodates full 3-turn SA scheme dialogue history |
+| **Fine-Tuning Batch Size** | **1** | Preserves VRAM headroom during backpropagation |
+| **Inference Batch Size** | **8** | Vectorized GPU batched generation |
+| **LoRA Configuration** | Rank = 8, Alpha = 16 | **1,304,576 trainable params** (4.98 MB, ~0.13% of Gemma 3 1B backbone) |
+
+---
+
+### 📊 Dataset Specifications & Partition Splits
+
+All datasets utilize a **100% JSONL-native format**, avoiding CSV escaping corruptions and preserving multiline dialogue structure.
+
+| Task Partition | Dataset File Name | Format | Record Count | Split Ratio |
+| :--- | :--- | :--- | :--- | :--- |
+| **Task 1 Training** | `conversation_training_data.jsonl` | JSONL | 192 dialogues | 80% Stratified |
+| **Task 1 Validation** | `conversation_validation_data.jsonl` | JSONL | 24 dialogues | 10% Stratified |
+| **Task 1 Testing** | `conversation_test_data.jsonl` | JSONL | 24 dialogues | 10% Stratified |
+| **Task 2 Training** | `classification_training_data.jsonl` | JSONL | 235 claim records | 80% Stratified |
+| **Task 2 Validation** | `classification_validation_data.jsonl` | JSONL | 29 claim records | 10% Stratified |
+| **Task 2 Testing** | `classification_test_data.jsonl` | JSONL | 30 claim records | 10% Stratified |
+
+---
+
+### 📈 Task 1 Benchmark Results: Multi-Turn Conversational Triage
+
+Evaluating Gemma 3 1B fine-tuned with LoRA (rank=8) across 3-turn interactive patient intake dialogues:
+
+#### 1. Quantitative NLG Evaluation Metrics
+Evaluated using ROUGE (1/2/L), BLEU-2, and Semantic Cosine Similarity (`SentenceTransformer: all-MiniLM-L6-v2`):
+
+| Evaluation Metric | Train Partition (Seen) | Validation Partition | Test Partition (Unseen) | Key Observation |
+| :--- | :--- | :--- | :--- | :--- |
+| **ROUGE-1 (Unigram Overlap)** | 0.2131 | 0.2291 | **0.2159** | Consistent unigram alignment across splits |
+| **ROUGE-2 (Bigram Overlap)** | 0.0276 | 0.0552 | **0.0410** | Stable phrase structure retention |
+| **ROUGE-L (Longest Sequence)**| 0.1479 | 0.1497 | **0.1474** | Preserved sentence structure |
+| **BLEU-2 (Precision Metric)** | 0.0306 | 0.0465 | **0.0378** | Consistent N-gram precision |
+| **Semantic Cosine Similarity**| 0.4332 | 0.4435 | **0.4461** | **Strong generalization on unseen dialogues** |
+
+#### 2. Prompt Sensitivity & Dialect Robustness
+The model was tested across four South African greeting registers:
+* **isiZulu (*Sawubona*)**: Maintained empathetic intake tone and administrative scheme verification.
+* **isiXhosa (*Molo dokotela*)**: Instantly recognized greeting (*"Molo!"*) and triggered emergency intake routing to Netcare casualty.
+* **Urban Slang (*Aweh doc / Sho*)**: Successfully adapted to casual township phrasing (*"Keep me updated..."*).
+* **Formal English (*Good day doctor*)**: Produced structured, polite triage intake steps.
+
+---
+
+### 📉 Task 2 Benchmark Results: Single-Task Claim Policy Classification
+
+Evaluating the instruction-tuned classifier across policy adjudication decisions (`In-Cover`, `Out-of-Cover`, `Requires Pre-Auth`):
+
+#### 1. Aggregate Partition Performance
+
+| Metric | Train Partition (30 Sampled) | Validation Partition (29 Records) | Test Partition (30 Unseen Records) |
+| :--- | :--- | :--- | :--- |
+| **Accuracy** | **86.67%** | **65.52%** | **70.00%** |
+| **Precision (Weighted)** | **90.48%** | **82.76%** | **73.20%** |
+| **Recall (Weighted)** | **86.67%** | **65.52%** | **70.00%** |
+
+#### 2. Detailed Test Partition Classification Report (30 Unseen Records)
+
+| Policy Decision Category | Precision | Recall | F1-Score | Support | Operational Significance |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **In-Cover** | 0.53 | **0.90** | 0.69 | 10 | High safety net for covered acute & chronic conditions |
+| **Out-of-Cover** | **1.00** | **1.00** | **1.00** | 10 | **Flawless exclusion safety (0 false approvals)** |
+| **Requires Pre-Auth** | 0.67 | 0.20 | 0.31 | 10 | Conservative spillover into general covered status |
+| **Overall Accuracy** | | | **0.70** | 30 | Reliable baseline for automated claim routing |
+
+---
+
+### 🔄 Step 9: End-to-End Hybrid Pipeline
+
+The hybrid pipeline connects both models sequentially in a single execution step:
 
 ```text
-Care2ClaimLLM-ZA/
-├── README.md                                  # Comprehensive Project Overview & Setup
-├── LICENSE                                    # MIT License
-├── requirements.txt                           # Dependency specifications
-├── imports.py                                 # Centralized imports & JAX/Keras environment setup
-│
-├── data/
-│   ├── raw/
-│   │   ├── task1_conversation_data_balanced.jsonl   # Raw synthesized 3-turn dialogues
-│   │   └── task2_classification_data_balanced.jsonl # Raw algorithmically labelled claim records
-│   └── splits/
-│       ├── conversation_training_data.jsonl         # Task 1 Training Split (80%)
-│       ├── conversation_validation_data.jsonl       # Task 1 Validation Split (10%)
-│       ├── conversation_test_data.jsonl             # Task 1 Test Split (10%)
-│       ├── classification_training_data.jsonl       # Task 2 Training Split (80%)
-│       ├── classification_validation_data.jsonl     # Task 2 Validation Split (10%)
-│       └── classification_test_data.jsonl           # Task 2 Test Split (10%)
-│
-├── predictions/
-│   ├── predictions_classification_train.jsonl       # Task 2 Train set prediction outputs
-│   ├── predictions_classification_val.jsonl         # Task 2 Validation set prediction outputs
-│   └── predictions_classification_test.jsonl        # Task 2 Test set prediction outputs
-│
-├── scripts/
-│   ├── task1/
-│   │   ├── task1_data_preparation.py          # Multilingual dialogue generation & balancing
-│   │   ├── task1_data_cleaning.py             # Normalization & 80/10/10 stratified splitting
-│   │   └── task1_training_and_evaluation.py   # Multi-turn LoRA fine-tuning & evaluation
-│   └── task2/
-│       ├── task2_data_preparation.py          # Rule engine labelling & class balancing
-│       ├── task2_data_cleaning.py             # HTML/Unicode cleaning & partition export
-│       └── task2_training_and_evaluation.py   # Single-task LoRA fine-tuning & evaluation
-│
-└── notebooks/
-    ├── Task1_Conversational_Triage.ipynb       # Colab execution notebook for Task 1
-    └── Task2_Policy_Classification.ipynb      # Colab execution notebook for Task 2
+[Patient Intake Chat] ──► Task 1 Model (Triage) ──► Extracted Clinical Payload
+                                                                 │
+[Adjudication Card]  ◄── Task 2 Model (Classifier) ─────────────┘
 ```
 
----
-
-#### 📊 Dataset Specifications & Files to Upload
-All dataset files follow a **100% JSONL-native pipeline**, eliminating CSV escaping corruptions and preserving multiline text integrity.
-
-| Category | File Name | Description | Format | Record Count |
-| :--- | :--- | :--- | :--- | :--- |
-| **Raw Master Data** | `task1_conversation_data_balanced.jsonl` | Complete multi-turn dialogue dataset | JSONL | Balanced (240) |
-| | `task2_classification_data_balanced.jsonl` | Complete medical claim classification dataset | JSONL | 294 records |
-| **Task 1 Splits** | `conversation_training_data.jsonl` | 80% Stratified Training Partition | JSONL | 192 records |
-| | `conversation_validation_data.jsonl` | 10% Stratified Validation Partition | JSONL | 24 records |
-| | `conversation_test_data.jsonl` | 10% Stratified Test Partition | JSONL | 24 records |
-| **Task 2 Splits** | `classification_training_data.jsonl` | 80% Stratified Training Partition | JSONL | 235 records |
-| | `classification_validation_data.jsonl` | 10% Stratified Validation Partition | JSONL | 29 records |
-| | `classification_test_data.jsonl` | 10% Stratified Test Partition | JSONL | 30 records |
-| **Predictions** | `predictions_classification_train.jsonl` | Model generated predictions (Train Sample) | JSONL | 30 records |
-| | `predictions_classification_val.jsonl` | Model generated predictions (Val Set) | JSONL | 29 records |
-| | `predictions_classification_test.jsonl` | Model generated predictions (Test Set) | JSONL | 30 records |
+#### Sample Hybrid Run Execution:
+* **Input Dialogue**: *"Sawubona doc! I have a severe burning pain in my chest when I cough. I am a 29-year-old female on Discovery KeyCare Access, currently at Netcare Park Lane."*
+* **Stage 1 (Triage Guidance)**: Generates conversational administrative guidance.
+* **Stage 2 (Payload Extraction)**: Auto-extracts `Scheme: Discovery (KeyCare)` and `Symptom: cough`.
+* **Stage 3 (Policy Decision)**: Adjudicates final claim status as **`[In-Cover]`**.
 
 ---
 
-#### 🛠️ Environment & System Setup
+### 🔒 Safety, Ethics & Guardrails
 
-##### 💻 Hardware & Runtime Specifications (Google Colab)
-All data processing, LoRA fine-tuning, and benchmark evaluations were executed on **Google Colab** under the following hardware environment and resource ceilings:
-
-| Resource Component | Ceiling / Specification | Operational Details |
-| :--- | :--- | :--- |
-| **Platform Environment** | **Google Colab** | Python 3.10+ / Linux Environment |
-| **Accelerator GPU** | **NVIDIA T4 GPU** | CUDA / XLA Tensor Core Acceleration |
-| **GPU VRAM Ceiling** | **15.0 GB GPU RAM** | Peak VRAM consumption: ~6.5 GB (`mixed_bfloat16`) |
-| **System RAM Ceiling** | **12.7 GB System RAM** | Memory-mapped JSONL streaming |
-| **Execution Engine** | **JAX Backend + Keras 3** | `XLA_PYTHON_CLIENT_MEM_FRACTION = 0.75` |
-
-##### Prerequisites & Dependencies
-Install required packages:
-```bash
-pip install -q keras-nlp keras>=3.0 jax jaxlib datasets rapidfuzz scikit-learn pandas numpy tqdm
-```
-
-##### Centralized Configuration (`imports.py`)
-All top-level imports and JAX/Keras hardware optimization flags are consolidated inside `imports.py` to ensure GPU memory stability on the T4 GPU:
-```python
-import os
-
-# Set JAX Backend & VRAM Headroom Allocations
-os.environ["KERAS_BACKEND"] = "jax"
-os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.75"
-
-import keras
-import keras_nlp
-import pandas as pd
-import numpy as np
-import json
-import re
-from sklearn.metrics import accuracy_score, classification_report, precision_score, recall_score
-from tqdm import tqdm
-```
+1. **No Autonomous Diagnosis**: Constrained strictly to administrative healthcare guidance and policy classification.
+2. **De-identified Data**: Built entirely on synthetic South African healthcare scenarios.
+3. **Human-in-the-Loop**: Administrative output serves as decision-support for scheme members and case managers.
 
 ---
 
-#### ⚙️ Model Architecture & Training Hyperparameters
-The model architecture utilizes Parameter-Efficient Fine-Tuning (LoRA) applied to Google's **Gemma 3 1B** base architecture:
-
-```python
-# Enable mixed_bfloat16 precision prior to preset instantiation
-keras.config.set_dtype_policy("mixed_bfloat16")
-keras.utils.set_random_seed(812)
-
-# Load Gemma 3 1B Base Model
-model = keras_nlp.models.Gemma3CausalLM.from_preset("gemma3_1b")
-
-# Configure LoRA Adaptation & Preprocessor
-lora_rank = 8
-learning_rate = 1e-4
-num_epochs = 3
-batch_size = 1  # Optimized for T4 GPU memory allocation stability
-sequence_length = 512  # Accommodates full SA scheme context without truncation
-
-model.backbone.enable_lora(rank=lora_rank)
-model.preprocessor.sequence_length = sequence_length
-
-model.compile(
-    optimizer=keras.optimizers.AdamW(learning_rate=learning_rate, weight_decay=0.01),
-    loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    metrics=[keras.metrics.SparseCategoricalAccuracy(name="accuracy")],
-    jit_compile=True
-)
-```
-
----
-
-#### 📈 Benchmark Results: Performance Overview
-
-##### Execution & Runtime Benchmarks on NVIDIA T4 GPU
-| Operational Phase | Total Items | Batch Size | Epochs / Runtime | Peak VRAM |
-| :--- | :--- | :--- | :--- | :--- |
-| **Task 1 Pre-processing & Split** | 240 dialogues | N/A | ~15 seconds | < 1.0 GB |
-| **Task 1 LoRA Fine-Tuning** | 192 dialogues | 2 | 3 Epochs (~8 mins) | ~6.2 GB |
-| **Task 2 Pre-processing & Split** | 294 claims | N/A | ~12 seconds | < 1.0 GB |
-| **Task 2 LoRA Fine-Tuning** | 235 claims | 1 | 3 Epochs (~9 mins) | ~6.5 GB |
-| **Task 2 Test Inference Evaluation**| 30 test claims | 8 (Batched) | ~2.5 mins | ~5.8 GB |
-
----
-
-##### Task 2: Single-Task Claim Policy Classification Results
-Fine-tuning Gemma 3 1B via LoRA transformed the base model into an instruction-tuned decision engine capable of adjudicating complex South African medical scheme rules:
-
-###### Pre-Training Zero-Shot Baseline
-* **Behavior**: Echoed input prompt text, repeated clinical descriptions in loops, or generated unformatted tokens.
-* **Classification Accuracy**: **0.00%** (Failed to generate formatted target category tokens).
-
-###### Fine-Tuned Performance Metrics (Post-LoRA)
-Evaluating across 80% training (sampled 30 records), 10% validation (29 records), and 10% test splits (30 records):
-
-| Metric | Train Partition (Seen Sample) | Validation Partition | Test Partition (Unseen) |
-| :--- | :--- | :--- | :--- |
-| **Accuracy** | **86.67%** | **72.41%** | **73.33%** |
-| **Precision (Weighted)** | **90.48%** | **84.67%** | **77.08%** |
-| **Recall (Weighted)** | **86.67%** | **72.41%** | **73.33%** |
-
-###### Detailed Test Set Classification Report
-| Policy Decision Category | Precision | Recall | F1-Score | Support |
-| :--- | :--- | :--- | :--- | :--- |
-| **In-Cover** | 0.56 | **0.90** | 0.69 | 10 |
-| **Out-of-Cover** | **1.00** | **1.00** | **1.00** | 10 |
-| **Requires Pre-Auth** | 0.75 | 0.30 | 0.43 | 10 |
-| **Overall Accuracy** | | | **0.73** | 30 |
-
-* **Out-of-Cover Claims**: Achieved **100% Precision, 100% Recall, and 1.00 F1-score**, flawlessly detecting uninsured/cash-only claims and excluded cosmetic/elective procedures.
-* **In-Cover Claims**: Achieved **90% Recall** on unseen test claims (and **100%** on train/val), providing a strong safety net for covered primary care and chronic conditions.
-* **Inference Speed**: Batched GPU generation (`batch_size=8`) processed evaluation partitions on the NVIDIA T4 GPU in under **2.5 minutes per split** (~8 minutes total across all splits).
-
----
-
-##### Task 1: Multi-Turn Conversational Triage Results
-*(Detailed individual metrics for the 3-turn conversational intake model will be populated during the Task 1 parallel training and evaluation loop).*
-
----
-
-##### Unified Multi-Task Pathway Results
-*(Results for the combined multi-task model integrating both Conversational Triage and Claim Classification will be populated upon final pipeline assembly).*
-
----
-
-#### 🔒 Safety, Ethics & Non-Diagnostic Guardrails
-Care2ClaimLLM-ZA is designed strictly as an **administrative navigation tool**. To ensure clinical safety and ethical compliance:
-1. **No Autonomous Diagnosis**: The system is explicitly constrained from diagnosing medical conditions or prescribing clinical treatments.
-2. **De-identified Data**: All datasets consist of synthetic, non-identifiable medical scenarios and scheme rules.
-3. **Regulatory Alignment**: Operational recommendations align with South African healthcare frameworks, emphasizing human-in-the-loop scheme verification.
-
----
-
-#### 📜 License
+### 📜 License
 Distributed under the **MIT License**.
