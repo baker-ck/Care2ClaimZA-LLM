@@ -14,7 +14,7 @@ Navigating private health insurance and medical schemes in South Africa presents
 The platform operates across two core operational pathways, culminating in an integrated end-to-end hybrid adjudication engine:
 1. **Task 1 (Multi-Turn Conversational Triage)**: A 3-turn interactive dialogue agent tailored with South African medical terminology, local dialects (*Sawubona*, *Molo dokotela*, *Aweh doc*), and demographic context to conduct patient intake and non-diagnostic administrative triage.
 2. **Task 2 (Single-Task Claim Policy Classification)**: An instruction-tuned classifier that categorizes medical claims into three policy decision categories: `In-Cover`, `Out-of-Cover`, and `Requires Pre-Auth`.
-3. **Step 9 Hybrid Pipeline**: Integrates raw multi-turn intake dialogue directly into automated claim payload extraction and real-time policy adjudication.
+3. **Hybrid Conversation-Classification Pipeline**: Integrates raw multi-turn intake dialogue directly into automated claim payload extraction and real-time policy adjudication.
 
 ---
 
