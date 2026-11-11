@@ -22,14 +22,6 @@ The platform operates across two core operational pathways, culminating in an in
 
 ```text
 Care2ClaimZA-LLM/
-├── README.md                                  # Project Documentation & Comprehensive Benchmark Report
-├── LICENSE                                    # MIT License
-├── Care2ClaimZA-LLM_datacard.pdf              # Care2ClaimZA-LLM Data Card Specification
-├── capstone-proposal-deeply-baked.docx        # Technical Capstone Proposal Document
-├── Care2ClaimLLM-ZA.pdf                       # Complete Executed Colab Notebook
-├── Task1_Conversational_Triage.py             # Task 1 Multi-Turn Fine-Tuning & Evaluation Pipeline
-├── Task2_Policy_Classification.py            # Task 2 Policy Classification Pipeline
-├── Care2ClaimZA-LLM_logo_final.png            # Project Visual Emblem / Logo
 ├── data/
 │   ├── raw/
 │   │   ├── task1_conversation_data_balanced.jsonl   # Raw synthesized 3-turn dialogue dataset
@@ -47,7 +39,14 @@ Care2ClaimZA-LLM/
 │   ├── predictions_conversation_test_data.jsonl
 │   ├── predictions_classification_train_data.jsonl
 │   ├── predictions_classification_val_data.jsonl
-│   └── predictions_classification_test_data.jsonl        
+│   └── predictions_classification_test_data.jsonl
+├── Care2ClaimZA-LLM.ipynb                     # Care2ClaimZA-LLM model source code
+├── Care2ClaimZA-LLM_datacard.pdf              # Care2ClaimZA-LLM Data Card Specification
+├── Care2ClaimZA-LLM_logo_final.png            # Project Visual Emblem / Logo
+├── LICENSE                                    # MIT License
+├── README.md                                  # Project Documentation & Comprehensive Benchmark Report
+├── capstone-proposal-deeply-baked.pdf        # Technical Capstone Proposal Document
+     
 ```
 
 ---
