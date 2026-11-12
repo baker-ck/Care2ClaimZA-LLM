@@ -58,7 +58,6 @@ All data processing, LoRA fine-tuning, and evaluation runs were executed on **Go
 | Hardware / Environment Component | Exact Setting / Value in Code | Operational Notes |
 | :--- | :--- | :--- |
 | **Platform Runtime** | **Google Colab** | Python 3.10+ / Linux OS |
-| **Persistent Storage Path** | `/content/drive/My Drive/Colab Notebooks/AI-research-foundations/08` | Mounted Google Drive project workspace |
 | **Accelerator GPU** | **NVIDIA T4 GPU** | CUDA / XLA Acceleration |
 | **System RAM** | **12.7 GB System RAM** | Memory-mapped JSONL streaming |
 | **Deep Learning Backend** | **JAX + Keras 3** | `os.environ["KERAS_BACKEND"] = "jax"` |
@@ -72,7 +71,7 @@ All data processing, LoRA fine-tuning, and evaluation runs were executed on **Go
 
 ---
 
-### 📊 Dataset Specifications & Partition Splits (Fact-Checked against Notebook Code)
+### 📊 Dataset Specifications & Partition Splits
 
 All datasets utilize a **100% JSONL-native format**, avoiding CSV escaping corruptions and preserving multiline dialogue structure. Partition sizes reflect the actual executed notebook `Step 0` inspection reports:
 
