@@ -40,9 +40,9 @@ Care2ClaimZA-LLM/
 │   ├── predictions_classification_train_data.jsonl
 │   ├── predictions_classification_val_data.jsonl
 │   └── predictions_classification_test_data.jsonl
-├── Care2ClaimZA-LLM.ipynb                     # Care2ClaimZA-LLM model source code
 ├── Care2ClaimZA-LLM_datacard.pdf              # Care2ClaimZA-LLM Data Card Specification
 ├── Care2ClaimZA-LLM_logo_final.png            # Project Visual Emblem / Logo
+├── Care2ClaimZA-LLM.ipynb                     # Care2ClaimZA-LLM model source code
 ├── LICENSE                                    # MIT License
 ├── README.md                                  # Project Documentation & Comprehensive Benchmark Report
 ├── capstone-proposal-deeply-baked.pdf        # Technical Capstone Proposal Document
